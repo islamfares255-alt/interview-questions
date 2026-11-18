@@ -121,6 +121,13 @@ main{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:70px 20p
 @keyframes land{from{transform:scale(.4) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
 @media (max-width:820px){main{grid-template-columns:1fr}.cols{grid-template-columns:1fr}.hero{padding-top:60px}.dock .lbl{display:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important;transition-duration:.01s!important}.cell{opacity:1;transform:none}h1 .w>span{transform:none}}
+/* iOS touch hardening */
+button,.q{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;-webkit-user-select:none;user-select:none}
+.dock{-webkit-transform:translateZ(0);left:0;right:0;margin-inline:auto;translate:none;width:max-content;max-width:calc(100% - 16px)}
+@media (hover:none){.dock button:hover,.mb button:hover,.chips span:hover,.deps span:hover,.logos img:hover{transform:none}.dock button:hover{background:rgba(255,255,255,.1)}.q:hover{background:transparent;padding-inline-start:6px}.card{transform:none!important}}
+.m{-webkit-overflow-scrolling:touch}
+#cl.arm{background:var(--red)}
+@media (max-width:820px){.dock{gap:4px}.dock button{padding:8px 11px}.dock .prog{padding:0 6px}}
 </style>
 </head>
 <body>
@@ -162,6 +169,7 @@ main{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:70px 20p
   <button id="tm" title="مؤقت المقابلة"><svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" stroke="rgba(255,255,255,.25)"/><circle id="rg" cx="18" cy="18" r="15" stroke-dasharray="94.25" stroke-dashoffset="0"/></svg><span id="tt">15:00</span></button>
   <button id="rs" title="إعادة المؤقت" aria-label="إعادة المؤقت">↺</button>
   <span class="prog" id="pg">0 / 31</span>
+  <button id="cl" type="button" title="مسح كل التحديدات" aria-label="مسح كل التحديدات"><span class="ic">🗑</span></button>
   <button id="th" title="الوضع" aria-label="تبديل الوضع">◐</button>
 </div>
 
@@ -259,6 +267,14 @@ const show=()=>{const m=Math.floor(left/60),s=left%60;$('#tt').textContent=Strin
 $('#tm').onclick=()=>{if(run){clearInterval(run);run=null;return}
   run=setInterval(()=>{left--;show();if(left<=0){clearInterval(run);run=null;$('#tm').classList.add('timeup')}},1000)};
 $('#rs').onclick=()=>{clearInterval(run);run=null;left=900;$('#tm').classList.remove('timeup');show()};
+
+/* clear all */
+let clT=null;
+function disarm(){const b=$('#cl');b.classList.remove('arm');b.querySelector('.ic').textContent='🗑';b.title='مسح كل التحديدات'}
+$('#cl').onclick=()=>{const b=$('#cl');if(!done.size)return;
+  if(!b.classList.contains('arm')){b.classList.add('arm');b.querySelector('.ic').textContent='❗';b.title='دوس تاني للتأكيد';clT=setTimeout(disarm,3000);return}
+  clearTimeout(clT);done.clear();A('.q').forEach(q=>{q.classList.remove('done');q.setAttribute('aria-checked','false')});
+  $('#pg').textContent=ar(0)+' / '+ar(flat.length);disarm()};
 
 /* theme */
 $('#th').onclick=()=>{const d=document.documentElement,dark=d.dataset.theme?d.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;d.dataset.theme=dark?'light':'dark'};
